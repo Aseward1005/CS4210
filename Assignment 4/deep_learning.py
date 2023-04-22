@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------
-# AUTHOR: your name
-# FILENAME: title of the source file
-# SPECIFICATION: description of the program
+# AUTHOR: Anthony Seward
+# FILENAME: deep_learning.py
+# SPECIFICATION: Trains a deep learning model with varying hyperparameters to solve the fashin MNIST dataset
 # FOR: CS 4210- Assignment #4
-# TIME SPENT: how long it took you to complete the assignment
+# TIME SPENT: 40 minutes
 #-----------------------------------------------------------*/
 
 #IMPORTANT NOTE: YOU CAN USE ANY PYTHON LIBRARY TO COMPLETE YOUR CODE.
@@ -20,21 +20,22 @@ def build_model(n_hidden, n_neurons_hidden, n_neurons_output, learning_rate):
     #-->add your Pyhton code here
 
     #Creating the Neural Network using the Sequential API
-    #model = keras.models.Sequential()
-    #model.add(keras.layers.Flatten(input_shape=[28, 28]))                                #input layer
+    model = keras.models.Sequential()
+    model.add(keras.layers.Flatten(input_shape=[28, 28]))                                #input layer
 
     #iterate over the number of hidden layers to create the hidden layers:
-    #model.add(keras.layers.Dense(n_neurons_hidden, activation="relu"))                   #hidden layer with ReLU activation function
+    for i in range(n_hidden):
+        model.add(keras.layers.Dense(n_neurons_hidden, activation="relu"))                   #hidden layer with ReLU activation function
 
     #output layer
-    #model.add(keras.layers.Dense(n_neurons_output, activation="softmax"))                #output layer with one neural for each class and the softmax activation function since the classes are exclusive
+    model.add(keras.layers.Dense(n_neurons_output, activation="softmax"))                #output layer with one neural for each class and the softmax activation function since the classes are exclusive
 
     #defining the learning rate
-    #opt = keras.optimizers.SGD(learning_rate)
+    opt = keras.optimizers.SGD(learning_rate)
 
     #Compiling the Model specifying the loss function and the optimizer to use.
-    #model.compile(loss="sparse_categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
-    #return model
+    model.compile(loss="sparse_categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
+    return model
 
 
 #To install Tensor Flow on your terminal
@@ -58,26 +59,36 @@ class_names = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", 
 n_hidden = [2, 5, 10]
 n_neurons = [10, 50, 100]
 l_rate = [0.01, 0.05, 0.1]
-
-for :                          #looking or the best parameters w.r.t the number of hidden layers
-    for :                      #looking or the best parameters w.r.t the number of neurons
-        for :                  #looking or the best parameters w.r.t the learning rate
+highestAccuracy = 0
+for layers in n_hidden:                          #looking or the best parameters w.r.t the number of hidden layers
+    for neurons in n_neurons:                      #looking or the best parameters w.r.t the number of neurons
+        for learning_rate in l_rate:                  #looking or the best parameters w.r.t the learning rate
 
             #build the model for each combination by calling the function:
-            #model = build_model()
+            model = build_model(layers, neurons, len(class_names), learning_rate)
             #-->add your Pyhton code here
 
             #To train the model
-            #history = model.fit(X_train, y_train, epochs=5, validation_data=(X_valid, y_valid))  #epochs = number times that the learning algorithm will work through the entire training dataset.
+            history = model.fit(X_train, y_train, epochs=5, validation_data=(X_valid, y_valid))  #epochs = number times that the learning algorithm will work through the entire training dataset.
             #-->add your Pyhton code here
 
             #Calculate the accuracy of this neural network and store its value if it is the highest so far. To make a prediction, do:
-            class_predicted = np.argmax(model.predict(X_test), axis=-1)
+            #class_predicted = np.argmax(model.predict(X_test), axis=-1)
             #-->add your Pyhton code here
 
-            print("Highest accuracy so far: " + str(highestAccuracy))
-            print("Parameters: " + "Number of Hidden Layers: " + str(h) + ",number of neurons: " + str(n) + ",learning rate: " + str(l))
-            print()
+            #get the number of correct predictions
+            class_predictions = np.argmax(model.predict(X_test), axis=-1)
+            correct = sum([pred == y_test[i] for i, pred in enumerate(class_predictions)])
+            
+            # use that to get the accuracy
+            acc = correct/len(X_test)
+
+            # replace the highest if necessary
+            if acc > highestAccuracy:
+                highestAccuracy = acc
+                print("Highest accuracy so far: " + str(highestAccuracy))
+                print("Parameters: " + "Number of Hidden Layers: " + str(layers) + ", number of neurons: " + str(neurons) + ", learning rate: " + str(learning_rate))
+                print()
 
 #After generating all neural networks, print the summary of the best model found
 #The model’s summary() method displays all the model’s layers, including each layer’s name (which is automatically generated unless you set it when creating the layer), its
