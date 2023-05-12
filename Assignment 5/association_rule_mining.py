@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------
-# AUTHOR: your name
-# FILENAME: title of the source file
-# SPECIFICATION: description of the program
+# AUTHOR: Anthony Seward
+# FILENAME: association_rule_mining.py
+# SPECIFICATION: association rule mining test
 # FOR: CS 4210- Assignment #5
-# TIME SPENT: how long it took you to complete the assignment
+# TIME SPENT: 1 hr
 #-----------------------------------------------------------*/
 
 import pandas as pd
@@ -41,8 +41,13 @@ itemset.remove(np.nan)
 encoded_vals = []
 for index, row in df.iterrows():
 
-    labels = {}
+    labels = {item:0 for item in itemset}
 
+    for item in row:
+        if (item in itemset):
+            labels[item] = 1
+
+    #print(labels)
     encoded_vals.append(labels)
 
 #adding the populated list with multiple dictionaries to a data frame
@@ -52,6 +57,8 @@ ohe_df = pd.DataFrame(encoded_vals)
 freq_items = apriori(ohe_df, min_support=0.2, use_colnames=True, verbose=1)
 rules = association_rules(freq_items, metric="confidence", min_threshold=0.6)
 
+print(rules.head())
+
 #iterate the rules data frame and print the apriori algorithm results by using the following format:
 
 #Meat, Cheese -> Eggs
@@ -60,11 +67,28 @@ rules = association_rules(freq_items, metric="confidence", min_threshold=0.6)
 #Prior: 0.4380952380952381
 #Gain in Confidence: 52.17391304347825
 #-->add your python code below
+for index, row in rules.iterrows():
+    priors = list(row['antecedents'])
+    consequents = list(row['consequents'])
+    print(', '.join(priors) + " -> " + ', '.join(consequents))
+    print("support: "  + str(row['support']))
+    print("Confidence: " + str(row['confidence']))
 
 #To calculate the prior and gain in confidence, find in how many transactions the consequent of the rule appears (the supporCount below). Then,
 #use the gain formula provided right after.
-#prior = suportCount/len(encoded_vals) -> encoded_vals is the number of transactions
-#print("Gain in Confidence: " + str(100*(rule_confidence-prior)/prior))
+    supportCount = 0
+    for val in encoded_vals:
+        num = 0
+        for consequent in consequents:
+            if val[consequent]:
+                num += 1
+        if (num == len(consequents)):
+            supportCount += 1
+
+    prior = supportCount/len(encoded_vals) # -> encoded_vals is the number of transactions
+    print("Prior: " + str(prior))
+    print("Gain in Confidence: " + str(100*(row['confidence']-prior)/prior))
+    print()
 #-->add your python code below
 
 #Finally, plot support x confidence
